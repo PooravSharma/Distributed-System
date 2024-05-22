@@ -99,18 +99,16 @@ def checkDetail():
                 
         print("Requesting Check Student Data from Client server....")
          # If the person is not a student
-        if honors_Check.checkStudent(person_id, last_name, email) == False:
-            print("Your details does not match our records!!! Try again")
-            main()
-            
-       
+        #if honors_Check.checkStudent(person_id, last_name, email) == False:
+            #main()
+        menu()
     else:
          print("Manually input your scores")
 
-      
 
-
-def menu(): 
+def menu():
+    uri = "PYRO:honorsCheck@" + SERVER + ":" + str(PORT)
+    honors_Check = Pyro4.Proxy(uri)
     try:
         while True:
             print("1. Display Scores")
@@ -120,15 +118,15 @@ def menu():
             choice = input("Enter your choice: ").strip()
 
             if choice == "1":
-                scores = honors_check.displayScore(person_id)
+                scores = honors_Check.displayScore(person_id)
                 print("Requesting returns from Server....")
                 displayScore(scores)
             elif choice == "2":
-                course_average = honors_check.calculateCourseAverage(person_id)
+                course_average = honors_Check.honoursEvaluation()
                 print("Requesting course average from Server....")
                 displayAverage(course_average)
             elif choice == "3":
-                best_8_average = honors_check.calculateBest8Average(person_id)
+                best_8_average = honors_Check.calculateBest8Average(person_id)
                 print("Requesting average of best 8 scores from Server....")
                 displayAverage(best_8_average)
             elif choice == "4":
@@ -144,9 +142,9 @@ def menu():
 
     
 def main():
-   splashScreen()
-   checkDetail()
-
+    splashScreen()
+    checkDetail()
+    honors_Check.honoursEvaluation()
     
 if __name__ == "__main__":
     main()
