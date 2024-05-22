@@ -7,11 +7,11 @@ SERVER = "localhost"
 
 
 uri = "PYRO:honorsCheck@"+SERVER+":"+str(PORT)
-server1=Pyro4.Proxy(uri)
+honors_Check=Pyro4.Proxy(uri)
 
 
-person_Id = "";
-last_Name= "";
+person_id = "";
+last_name= "";
 email= "";
 
 def splashScreen():
@@ -74,9 +74,9 @@ def checkDetail():
     if checkStudent() == True:
         # If the person is a student
         while True: 
-            person_Id = getInput("What is your Student ID? ").strip()
-            if person_Id:
-                if not person_Id.isdigit():
+            person_id = getInput("What is your Student ID? ").strip()
+            if person_id:
+                if not person_id.isdigit():
                     print("\nEnter digits for Student ID\n")
                 else:
                     break
@@ -84,8 +84,8 @@ def checkDetail():
                 print("\n Student ID cannot be empty!!!\n")
 
         while True: 
-            last_Name = getInput("What is your Last Name? ").strip()
-            if last_Name:
+            last_name = getInput("What is your Last Name? ").strip()
+            if last_name:
                 break
             else:
                 print("\nLast Name cannot be empty!!!\n")
@@ -99,7 +99,7 @@ def checkDetail():
                 
         print("Requesting Check Student Data from Client server....")
          # If the person is not a student
-        if server1.checkStudent(person_Id, last_Name, email) == False:
+        if honors_Check.checkStudent(person_id, last_name, email) == False:
             print("Your details does not match our records!!! Try again")
             main()
             
