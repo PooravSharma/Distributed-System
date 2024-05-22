@@ -28,26 +28,11 @@ class db(object):
 
 
     #----- Exposed Methods that can be invoked
-    def authentication(self, person_id, last_name, email):
-        try:
-            print("in Server2: SA1 -> SA2 : Called getUserDetails")
-            stu_info = list()
-
-            print("Attempting to Perform MSSQL Database lookup")
-            cursor = self.__sqlQuery('SELECT * FROM student_info WHERE person_id = ?, last_name = ?, email = ?', [person_id, last_name, email])
-            if cursor is None:
-                return False
-            else:
-                self.getUserDetails(person_id)
-                return True
-        except:
-            print("from Server2: SA2 -> SA1 : Database Error")
-            return None
 
     def getUserDetails(self, person_id):
         try:
             print("in Server2: SA1 -> SA2 : Called getUserDetails")
-            grades = list()
+            grades = []
 
             print("Attempting to Perform MSSQL Database lookup")
             cursor = self.__sqlQuery('SELECT unit_code, result_score FROM student_unit WHERE person_id = ?', [person_id])
