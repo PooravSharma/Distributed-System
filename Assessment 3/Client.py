@@ -118,7 +118,7 @@ def menu():
             choice = input("Enter your choice: ").strip()
 
             if choice == "1":
-                scores = honors_Check.displayScore(person_id)
+                scores = honors_Check.displayScore(20241201)
                 print("Requesting returns from Server....")
                 displayScore(scores)
             elif choice == "2":
@@ -142,10 +142,10 @@ def menu():
 
     
 def main():
-    splashScreen()
-    checkDetail()
-    honors_Check.honoursEvaluation()
+    #splashScreen()
+   # checkDetail()
+    #honors_Check.honoursEvaluation()
+   menu()
     
 if __name__ == "__main__":
     main()
-

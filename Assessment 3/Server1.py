@@ -9,7 +9,7 @@ SA2_SERVER = "localhost"
 SA1_PORT = 51515
 
 
-globalGrade = ()
+globalGrade = []
 globalID = ""
 sortedGlobalGrade= ()
 topAverage = ""
@@ -39,8 +39,9 @@ class honorsCheck(object):
             database = Pyro4.Proxy(sa2Uri)
 
             # Request user details
-            globalID = person_id
-            globalGrade = database.getUserDetails(person_id)
+            #globalID = person_id
+            #globalGrade = database.getUserDetails(person_id)
+            return database.getUserDetails(person_id)
         except Exception as e:
             print("Error in __getUserDetails:", e)
             return None
@@ -49,14 +50,14 @@ class honorsCheck(object):
     # ----- Exposed Methods to be invoked by client
 
     # displaying individual scores
-    def displayScore(self):
-        #globalID = person_id
+    def displayScore(self, person_id):
+        globalID = person_id
         print("from server1: Client -> SA1 : Called displayScore")
         grades = self.__getUserDetails(person_id)
         globalGrade.extend(grades)
         if grades is not None:
-            for unit_code, unit_score in grades:
-                print(f"Unit Code: {unit_code}, Unit Score: {unit_score}")
+            #for unit_code, unit_score in grades:
+               # print(f"Unit Code: {unit_code}, Unit Score: {unit_score}")
             print("in Server1: SA1 -> Client : Sending data back to client")
             return grades
         else:

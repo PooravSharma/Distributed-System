@@ -2,7 +2,7 @@ import pyodbc
 import Pyro4
 
 #Configure SQL Server Details
-SQL_SERVER_NAME = "DESKTOP-5HMEDN7"
+SQL_SERVER_NAME = "DESKTOP-OMRPVAU"
 SQL_SERVER_DB = "student"
 
 #Set Server2 Serving Details
@@ -79,4 +79,3 @@ print("-----------------------------")
 print()
 print("Ready. Object uri =", uri)
 daemon.requestLoop()
-
