@@ -11,9 +11,10 @@ SA1_PORT = 51515
 
 globalGrade = []
 globalID = ""
-sortedGlobalGrade= ()
-topAverage = ""
-totalAverage = ""
+topAverage = 0.0
+totalAverage = 0.0
+
+
 @Pyro4.expose
 class honorsCheck(object):
 
@@ -51,11 +52,13 @@ class honorsCheck(object):
 
     # displaying individual scores
     def displayScore(self, person_id):
+        global globalGrade
+        global globalID 
         globalID = person_id
         print("from server1: Client -> SA1 : Called displayScore")
         grades = self.__getUserDetails(person_id)
-        globalGrade.extend(grades)
         if grades is not None:
+            globalGrade = [(unit_code, float(unit_score)) for unit_code, unit_score in grades] 
             #for unit_code, unit_score in grades:
                # print(f"Unit Code: {unit_code}, Unit Score: {unit_score}")
             print("in Server1: SA1 -> Client : Sending data back to client")
@@ -66,6 +69,7 @@ class honorsCheck(object):
 
     # Calculating course average
     def calculateCourseAverage(self):
+        global totalAverage
         print("from server1: Client -> SA1 : Called calculateCourseAverage")
         #grades = self.__getUserDetails(person_id)
         numberOfGrade = len(globalGrade)
@@ -83,25 +87,6 @@ class honorsCheck(object):
             print("in Server1: SA1 -> Client : Error calculating average")
             return None
 
-    def calculateBest8Average(self, person_id):
-        grades = self.__getUserDetails(person_id)
-        if grades is not None:
-            try:
-                # Sort grades by score in descending order
-                scores = [float(unit_score) for _, unit_score in grades]
-                sorted_scores = sorted(scores, key=lambda x: x[1], reverse=True)
-                # Select the best 8 scores
-                best_8_scores = sorted_scores[:8]
-                # Calculate the average of the best 8 scores
-                best_8_average = sum(best_8_scores) / len(best_8_scores) if best_8_scores else 0
-                print(f"in Server1: SA1 -> Client : Average of best 8 scores is {best_8_average}")
-                return round(best_8_average, 2)
-            except ValueError as e:
-                print(f"Value error in calculateBest8Average: {e}")
-                return None
-        else:
-            print("in Server1: SA1 -> Client : Error calculating average")
-            return None
 
     def checkStudent(person_id, last_name, email):
         try:
@@ -117,18 +102,23 @@ class honorsCheck(object):
             return None
         
     def gettopAverage(self):
+        global globalGrade
+        global topAverage
         globalGrade = sorted(globalGrade, key = lambda x: [1], reverse = True)
         topGrades = globalGrade[:8]
         totalSum = sum(grade for _, grade in topGrades)
-        topAverage = totalSum/8
+        topAverage = totalSum / 8.0
+        topAverage = round(topAverage, 2)
 
         
 
-    def honoursEvalutaion(self):
+    def honoursEvaluation(self):
+        global globalGrade
+        global globalID
         self.gettopAverage()
         self.calculateCourseAverage()
         passedGrade = len(globalGrade)
-        failNumber= sum(1 for grade in globalGrade if grade < 50)
+        failNumber= sum(1 for _, grade in globalGrade if grade < 50) 
 
         if passedGrade <= 15:
             return f"{globalID}, {totalAverage}, completed less than 16 units! DOES NOT QUALIFY FOR HONORS STUDY!"

@@ -10,9 +10,9 @@ uri = "PYRO:honorsCheck@"+SERVER+":"+str(PORT)
 honors_Check=Pyro4.Proxy(uri)
 
 
-person_id = "";
-last_name= "";
-email= "";
+person_id = ""
+last_name= ""
+email= ""
 
 def splashScreen():
     print("-------------------------------------")
@@ -70,7 +70,10 @@ def displayAverage(course_average):
         print(f"Your course average is: {course_average}")
 
 def checkDetail():
-   
+    global person_id
+    global last_name
+    global email
+    
     if checkStudent() == True:
         # If the person is a student
         while True: 
@@ -107,6 +110,7 @@ def checkDetail():
 
 
 def menu():
+    global person_id
     uri = "PYRO:honorsCheck@" + SERVER + ":" + str(PORT)
     honors_Check = Pyro4.Proxy(uri)
     try:
@@ -118,7 +122,7 @@ def menu():
             choice = input("Enter your choice: ").strip()
 
             if choice == "1":
-                scores = honors_Check.displayScore(20241201)
+                scores = honors_Check.displayScore(person_id)
                 print("Requesting returns from Server....")
                 displayScore(scores)
             elif choice == "2":
@@ -142,10 +146,10 @@ def menu():
 
     
 def main():
-    #splashScreen()
-   # checkDetail()
+    splashScreen()
+    checkDetail()
     #honors_Check.honoursEvaluation()
-   menu()
+   #menu()
     
 if __name__ == "__main__":
     main()
