@@ -9,9 +9,26 @@ SA2_SERVER = "localhost"
 SA1_PORT = 51515
 
 
+
+
+
 @Pyro4.expose
 class honorsCheck(object):
+    topAverage = "";
+    
     #Perform Database Lookup
+    def __authentication(self, person_id, last_name, email):
+        try:
+            print("from Server1: SA1 -> SA2 : Performing Database Request")
+            # Connect to SA2 with RMI
+            sa2Uri = f"PYRO:honorsDb@{SA2_SERVER}:{SA2_PORT}"
+            database = Pyro4.Proxy(sa2Uri)
+
+            # Request user details
+            return database.authentication(person_id, last_name, email)
+        except Exception as e:
+            print("Error in __getUserDetails:", e)
+            return None
     def __getUserDetails(self, person_id):
         try:
             print("from Server1: SA1 -> SA2 : Performing Database Request")
@@ -79,26 +96,56 @@ class honorsCheck(object):
             print("in Server1: SA1 -> Client : Error calculating average")
             return None
 
-
-def checkStudent(person_Id, last_Name, email):
-    try:
+    def checkStudent(person_id, last_name, email):
+        try:
             print("from Server1: SA1 -> SA2 : Performing Database Request")
             # Connect to SA2 with RMI
             sa2Uri = f"PYRO:honorsDb@{SA2_SERVER}:{SA2_PORT}"
             server2 = Pyro4.Proxy(sa2Uri)
 
             # Request user details
-            return server2.authentication(person_Id, last_Name, email)
+            return server2.authentication(person_id, last_name, email)
         except Exception as e:
             print("Error in __getUserDetails:", e)
             return None
+        
+    def gettopAverage():
+        globalGrade = sorted(globalGrade, key = lamda x: [1], reverse = True)
+        topGrades = globalGrade[:8]
+        totalSum = sum(grade for _, grade in topGrades)
+        return topAverage = totalSum/8
+        
+
+    def honursEvalutaion():
+        passedGrade = len(globalGrade)
+        failNumber= sum(1 for grade in globalGrade if grade < 50)
+
+    if passedGrade <= 15:
+        return f"{person_id}, {course_average}, completed less than 16 units! DOES NOT QUALIFY FOR HONORS STUDY!"
+    
+    if failNumber >= 6:
+        return f"{person_id}, {course_average}, with 6 or more Fails! DOES NOT QUALIFY FOR HONORS STUDY!"
+    
+    if course_average >= 70:
+        return f"{person_id}, {course_average}, QUALIFIES FOR HONOURS STUDY!"
+    
+    elif 65 <= course_average < 70 and topAverage >= 80:
+        return f"{person_id}, {course_average}, {best_8_average}, QUALIFIES FOR HONOURS STUDY!"
+    
+    elif 65 <= course_average < 70 and topAverage < 80:
+        return f"{person_id}, {course_average}, {best_8_average}, MAY HAVE GOOD CHANCE! Need further assessment!"
+    
+    elif 60 <= course_average < 65 and topAverage >= 80:
+        return f"{person_id}, {course_average}, {best_8_average}, MAY HAVE A CHANCE! Must be carefully reassessed and get the coordinator’s permission!"
+    
+    else:
+        return f"{person_id}, {course_average}, DOES NOT QUALIFY FOR HONORS STUDY!"
 
 
-
-#Accept RMI
+    #Accept RMI
 honors_Check=honorsCheck()
 daemon=Pyro4.Daemon(port = SA1_PORT)                
-uri=daemon.register(server1, "server1")
+uri=daemon.register(honors_check, "honorscheck")
 
 print("--------------------")
 print(" Server 1: Interface")
@@ -106,5 +153,3 @@ print("--------------------")
 print()
 print("Ready. Object uri =", uri)
 daemon.requestLoop()
-
-
