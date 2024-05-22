@@ -28,7 +28,23 @@ class db(object):
 
 
     #----- Exposed Methods that can be invoked
+    def Authentication(self, person_id, last_name, email):
+        try:
+            print("in Server2: SA1 -> SA2 : Called getUserDetails")
+            stu_info = list()
 
+            print("Attempting to Perform MSSQL Database lookup")
+
+            cursor = self.__sqlQuery('SELECT * FROM student_info WHERE person_id = ? AND last_name = ? AND email = ?', [person_id, last_name, email])
+        
+            if cursor is None:
+                return False
+            else: 
+                return True
+        except Exception as e:  # Proper exception handling
+            print(f"An error occurred during authentication: {e}")
+            return False
+    
     def getUserDetails(self, person_id):
         try:
             print("in Server2: SA1 -> SA2 : Called getUserDetails")
