@@ -28,39 +28,36 @@ class db(object):
 
 
     #----- Exposed Methods that can be invoked
-    def Authentication(self, person_id, last_name, email):
+    def getUserDetails(self, person_id, last_name, email):
         try:
-            print("in Server2: SA1 -> SA2 : Called getUserDetails")
-            stu_info = list()
+            print("in Server2: SA1 -> SA2 : Called getUserDetails")  # Authenticate user
+            conn = pyodbc.connect('Driver={SQL Server};'
+                                  'Server=' + SQL_SERVER_NAME + ';'
+                                                                'Database=' + SQL_SERVER_DB + ';'
+                                                                                              'Trusted_Connection=yes;')
+            cursor = conn.cursor()
+            cursor.execute('SELECT person_id FROM student_info WHERE person_id = ? AND last_name = ? AND email = ?',
+                           (person_id, last_name, email))
+            user_exists = cursor.fetchone()
+            if user_exists:
+                # User is authenticated, fetch grades
+                print("User authenticated. Attempting to Perform MSSQL Database lookup")
+                grades = []
 
-            print("Attempting to Perform MSSQL Database lookup")
+                cursor = self.__sqlQuery('SELECT unit_code, result_score FROM student_unit WHERE person_id = ?',
+                                         [person_id])
+                if cursor:
+                    for row in cursor:
+                        # add the grades to the list
+                        grades.append([row[0], row[1]])
 
-            cursor = self.__sqlQuery('SELECT * FROM student_info WHERE person_id = ? AND last_name = ? AND email = ?', [person_id, last_name, email])
-        
-            if cursor is None:
-                return False
-            else: 
-                return True
-        except Exception as e:  # Proper exception handling
-            print(f"An error occurred during authentication: {e}")
-            return False
-    
-    def getUserDetails(self, person_id):
-        try:
-            print("in Server2: SA1 -> SA2 : Called getUserDetails")
-            grades = []
-
-            print("Attempting to Perform MSSQL Database lookup")
-            cursor = self.__sqlQuery('SELECT unit_code, result_score FROM student_unit WHERE person_id = ?', [person_id])
-            if cursor:
-                for row in cursor:
-                    # add the grades to the list
-                    grades.append([row[0], row[1]])
-
-                print("from Server2: SA2-> SA1 : Sending Grades to server 1")
-                return grades
+                    print("from Server2: SA2-> SA1 : Sending Grades to server 1")
+                    return grades
+                else:
+                    print("No results found.")
+                    return None
             else:
-                print("No results found.")
+                print("User authentication failed.")
                 return None
         except:
             print("from Server2: SA2 -> SA1 : Sending Database Error")

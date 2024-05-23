@@ -20,43 +20,35 @@ class honorsCheck(object):
 
     
     #Perform Database Lookup
-    def __authentication(self, person_id, last_name, email):
+    def getUserDetails(self, person_id, last_name, email):
+        global globalGrade
+        global globalID
+        globalID = person_id
         try:
             print("from Server1: SA1 -> SA2 : Performing Database Request")
             # Connect to SA2 with RMI
             sa2Uri = f"PYRO:honorsDb@{SA2_SERVER}:{SA2_PORT}"
             database = Pyro4.Proxy(sa2Uri)
-
-            # Request user details
-            return database.authentication(person_id, last_name, email)
+            grades = database.getUserDetails(person_id, last_name, email)
+            if grades is not None:
+                globalGrade = [(unit_code, float(unit_score)) for unit_code, unit_score in grades]
+                return grades
+                # Request user details
+            #return database.getUserDetails(person_id, last_name, email)
+            return grades
         except Exception as e:
-            print("Error in __getUserDetails:", e)
+            print("Error in getUserDetails:", e)
             return None
-    def __getUserDetails(self, person_id):
-        try:
-            print("from Server1: SA1 -> SA2 : Performing Database Request")
-            # Connect to SA2 with RMI
-            sa2Uri = f"PYRO:honorsDb@{SA2_SERVER}:{SA2_PORT}"
-            database = Pyro4.Proxy(sa2Uri)
-
-            # Request user details
-            #globalID = person_id
-            #globalGrade = database.getUserDetails(person_id)
-            return database.getUserDetails(person_id)
-        except Exception as e:
-            print("Error in __getUserDetails:", e)
-            return None
-
 
     # ----- Exposed Methods to be invoked by client
 
     # displaying individual scores
-    def displayScore(self, person_id):
+    def displayScore(self, person_id, last_name, email):
         global globalGrade
-        global globalID 
+        global globalID
         globalID = person_id
         print("from server1: Client -> SA1 : Called displayScore")
-        grades = self.__getUserDetails(person_id)
+        grades = self.getUserDetails(person_id, last_name, email)
         if grades is not None:
             globalGrade = [(unit_code, float(unit_score)) for unit_code, unit_score in grades] 
             #for unit_code, unit_score in grades:
@@ -70,8 +62,6 @@ class honorsCheck(object):
     # Calculating course average
     def calculateCourseAverage(self):
         global totalAverage
-        print("from server1: Client -> SA1 : Called calculateCourseAverage")
-        #grades = self.__getUserDetails(person_id)
         numberOfGrade = len(globalGrade)
         if globalGrade is not None:
             try:
@@ -110,7 +100,12 @@ class honorsCheck(object):
         topAverage = totalSum / 8.0
         topAverage = round(topAverage, 2)
 
-        
+    def manualHonours(self, manualList: list):
+        global globalGrade
+        globalGrade = manualList
+        global globalID
+        globalID = "User"
+        return self.honoursEvaluation()
 
     def honoursEvaluation(self):
         global globalGrade

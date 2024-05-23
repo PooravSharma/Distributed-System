@@ -1,21 +1,20 @@
-#Ryan doc name: ca.py
+# Ryan doc name: ca.py
 import Pyro4
 
-#Set SA1 Connection Details
+# Set SA1 Connection Details
 PORT = 51515
 SERVER = "localhost"
 
-
-uri = "PYRO:honorsCheck@"+SERVER+":"+str(PORT)
-honors_Check=Pyro4.Proxy(uri)
-
+uri = "PYRO:honorsCheck@" + SERVER + ":" + str(PORT)
+honors_Check = Pyro4.Proxy(uri)
 
 person_id = ""
-last_name= ""
-email= ""
+last_name = ""
+email = ""
+manualScore = []
 
 def splashScreen():
-    print("-------------------------------------")
+    print("\n-------------------------------------")
     print("     == E-Open University ==         ")
     print("   Course/unit Checking System")
     print("-------------------------------------")
@@ -34,7 +33,8 @@ def checkStudent():
         else:
             print("Invalid input!!! Choose 'Y' for yes or 'N' for no.")
             print("")
-            
+
+
 def getInput(prompt):
     editPrompt = f"{prompt}                                     (Enter 'exit' to return to start fo the application)\n"
     while True:
@@ -46,37 +46,49 @@ def getInput(prompt):
         else:
             return user_input
 
-    
+
+def userInput(prompt):
+    editPrompt = f"{prompt}                                     (Enter 'done' when Finish or 'exit' to Restart Application)\n"
+    while True:
+        user_input = input(editPrompt).strip()
+        if user_input.lower() == "done":
+            print("\nEvaluating the honors qualification....\n")
+            checkingHonors()
+            break
+        elif user_input.lower() == "exit":
+            print("\nReturning to start\n")
+            main()
+            break
+        else:
+            return user_input
+
+
 def displayScore(grades):
     if grades is None:
-        print("Error: No course records found.")
+        print("Authentication failed!")
         return
     if not grades:
         print("No course records found.")
         return
     print()
-    print("--------your course record is as below---------------------------")
+    print("--------Your course record is as below---------------------------")
     print()
-    #print(qual)
-    print ("    No. | unit_code | unit_mark")
-    print ("--------+------------+----------")
+    # print(qual)
+    print("    No. | unit_code | unit_mark")
+    print("--------+------------+----------")
     for i, (unit_code, unit_mark) in enumerate(grades, start=1):
         print(f"   {i:3}  |   {unit_code:<10} |  {unit_mark:<6}")
+        
 
-def displayAverage(course_average):
-    if course_average is None:
-        print("Error: Could not calculate course average.")
-    else:
-        print(f"Your course average is: {course_average}")
 
 def checkDetail():
     global person_id
     global last_name
     global email
-    
+
     if checkStudent() == True:
         # If the person is a student
-        while True: 
+        while True:
             person_id = getInput("What is your Student ID? ").strip()
             if person_id:
                 if not person_id.isdigit():
@@ -86,28 +98,108 @@ def checkDetail():
             else:
                 print("\n Student ID cannot be empty!!!\n")
 
-        while True: 
+        while True:
             last_name = getInput("What is your Last Name? ").strip()
             if last_name:
                 break
             else:
                 print("\nLast Name cannot be empty!!!\n")
-                      
-        while True: 
+
+        while True:
             email = getInput("What is you OUST Email Address? ").strip()
             if email:
                 break
             else:
                 print("\nEmail cannot be empty!!!\n")
-                
-        print("Requesting Check Student Data from Client server....")
-         # If the person is not a student
-        #if honors_Check.checkStudent(person_id, last_name, email) == False:
-            #main()
-        menu()
-    else:
-         print("Manually input your scores")
 
+        print("Requesting authentication from server....")
+
+        scores = honors_Check.getUserDetails(person_id, last_name, email)
+
+        displayScore(scores)
+        if scores is not None:
+            print("")
+            evaResult = honors_Check.honoursEvaluation()
+            print("Evaluation honours qulifications....\n")
+            print(evaResult)
+            main()
+
+        else:
+            print("")
+            print("Try again")
+            main()
+    else:
+        print("Manually input your scores")
+        manualInput()
+
+
+def manualInput():
+    global manualScore
+    unit_scores = {}
+    failures = {}
+    unitCode = ""
+    score =""
+    manualScore.clear()
+    while len(unit_scores) < 16 or len(unit_scores) > 30:
+        if unitCode in failures and failures[unitCode] > 2:
+            print(f"\nThe unit {unitCode} failed more than twice.")
+            print("You fail your course")
+            main()
+            
+        while True:
+            unitCode= userInput("\nEnter the unit Code: ")
+            if unitCode:
+                break
+            else:
+                print("\nUnit Code cannot be empty!!!\n")
+                
+        if unitCode in unit_scores and unit_scores[unitCode][0] >=50:
+            print(f"\nThe unit {unitCode} cannot be repeated as you have passed already.")
+            continue
+        
+
+        
+        while True:
+            score = userInput("\nEnter the score (0.00 to 100.00): ")
+            if score:
+                try:
+                    score = float(score)
+                    if 0.00 <= score <= 100.00:
+                        break
+                    else:
+                        print("Invalid score. Please enter a score between 0.00 and 100.00.")
+
+                except ValueError:
+                    print("\nEnter a valid number for the score\n")
+            else:
+                print("\nScore cannot be empty!!!\n")
+        # Check score validity
+
+
+        # Initialize unit in dictionary if it does not exist
+        if unitCode not in unit_scores:
+            unit_scores[unitCode] = []
+            failures[unitCode] = 0        
+        # Add score and update failure count
+        unit_scores[unitCode].append(score)
+        if score < 50:
+            failures[unitCode] += 1
+        manualScore.append((unitCode, score))
+    # Print the final scores
+    #for unit, scores in unit_scores.items():
+        #print(f"Unit: {unit}, Scores: {scores}")
+
+
+
+def checkingHonors():
+    global manualScore
+    displayScore(manualScore)
+    uri = "PYRO:honorsCheck@" + SERVER + ":" + str(PORT)
+    honors_Check = Pyro4.Proxy(uri)
+    result = honors_Check.manualHonours(manualScore)
+    print("")
+    print(result)
+    main()
 
 def menu():
     global person_id
@@ -122,7 +214,7 @@ def menu():
             choice = input("Enter your choice: ").strip()
 
             if choice == "1":
-                scores = honors_Check.displayScore(person_id)
+                scores = honors_Check.displayScore(person_id, last_name, email)
                 print("Requesting returns from Server....")
                 displayScore(scores)
             elif choice == "2":
@@ -143,13 +235,10 @@ def menu():
         print("")
 
 
-
-    
 def main():
     splashScreen()
     checkDetail()
-    #honors_Check.honoursEvaluation()
-   #menu()
-    
+
+
 if __name__ == "__main__":
     main()
