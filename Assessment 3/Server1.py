@@ -42,23 +42,6 @@ class honorsCheck(object):
 
     # ----- Exposed Methods to be invoked by client
 
-    # displaying individual scores
-    def displayScore(self, person_id, last_name, email):
-        global globalGrade
-        global globalID
-        globalID = person_id
-        print("from server1: Client -> SA1 : Called displayScore")
-        grades = self.getUserDetails(person_id, last_name, email)
-        if grades is not None:
-            globalGrade = [(unit_code, float(unit_score)) for unit_code, unit_score in grades] 
-            #for unit_code, unit_score in grades:
-               # print(f"Unit Code: {unit_code}, Unit Score: {unit_score}")
-            print("in Server1: SA1 -> Client : Sending data back to client")
-            return grades
-        else:
-            print("in Server1: SA1 -> Client : Error retrieving data")
-            return None
-
     # Calculating course average
     def calculateCourseAverage(self):
         global totalAverage
@@ -75,20 +58,6 @@ class honorsCheck(object):
                 return None
         else:
             print("in Server1: SA1 -> Client : Error calculating average")
-            return None
-
-
-    def checkStudent(person_id, last_name, email):
-        try:
-            print("from Server1: SA1 -> SA2 : Performing Database Request")
-            # Connect to SA2 with RMI
-            sa2Uri = f"PYRO:honorsDb@{SA2_SERVER}:{SA2_PORT}"
-            server2 = Pyro4.Proxy(sa2Uri)
-
-            # Request user details
-            return server2.authentication(person_id, last_name, email)
-        except Exception as e:
-            print("Error in __getUserDetails:", e)
             return None
         
     def gettopAverage(self):

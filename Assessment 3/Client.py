@@ -140,7 +140,8 @@ def manualInput():
     unitCode = ""
     score =""
     manualScore.clear()
-    while len(unit_scores) < 16 or len(unit_scores) > 30:
+    
+    while len(unit_scores) < 30:
         if unitCode in failures and failures[unitCode] > 2:
             print(f"\nThe unit {unitCode} failed more than twice.")
             print("You fail your course")
@@ -148,8 +149,12 @@ def manualInput():
             
         while True:
             unitCode= userInput("\nEnter the unit Code: ")
-            if unitCode:
+            if unitCode and len(unitCode)<=7:
                 break
+            
+            elif len(unitCode)>7:
+                print("\nUnit code can only be 7 or less characters")
+                
             else:
                 print("\nUnit Code cannot be empty!!!\n")
                 
@@ -173,23 +178,17 @@ def manualInput():
                     print("\nEnter a valid number for the score\n")
             else:
                 print("\nScore cannot be empty!!!\n")
-        # Check score validity
-
-
-        # Initialize unit in dictionary if it does not exist
+                
         if unitCode not in unit_scores:
             unit_scores[unitCode] = []
             failures[unitCode] = 0        
-        # Add score and update failure count
+
         unit_scores[unitCode].append(score)
+        
         if score < 50:
             failures[unitCode] += 1
+            
         manualScore.append((unitCode, score))
-    # Print the final scores
-    #for unit, scores in unit_scores.items():
-        #print(f"Unit: {unit}, Scores: {scores}")
-
-
 
 def checkingHonors():
     global manualScore
@@ -200,39 +199,6 @@ def checkingHonors():
     print("")
     print(result)
     main()
-
-def menu():
-    global person_id
-    uri = "PYRO:honorsCheck@" + SERVER + ":" + str(PORT)
-    honors_Check = Pyro4.Proxy(uri)
-    try:
-        while True:
-            print("1. Display Scores")
-            print("2. Calculate Course Average")
-            print("3. Calculate 8 best scores")
-            print("4. Exit")
-            choice = input("Enter your choice: ").strip()
-
-            if choice == "1":
-                scores = honors_Check.displayScore(person_id, last_name, email)
-                print("Requesting returns from Server....")
-                displayScore(scores)
-            elif choice == "2":
-                course_average = honors_Check.honoursEvaluation()
-                print("Requesting course average from Server....")
-                displayAverage(course_average)
-            elif choice == "3":
-                best_8_average = honors_Check.calculateBest8Average(person_id)
-                print("Requesting average of best 8 scores from Server....")
-                displayAverage(best_8_average)
-            elif choice == "4":
-                print("Exiting...")
-                break
-            else:
-                print("Invalid choice. Please try again.")
-    except Pyro4.errors.PyroError as e:
-        print("Failed to retrieve data from the server: {e}")
-        print("")
 
 
 def main():
