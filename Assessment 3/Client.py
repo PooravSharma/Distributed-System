@@ -15,7 +15,7 @@ manualScore = []
 
 def splashScreen():
     print("\n-------------------------------------")
-    print("     == E-Open University ==         ")
+    print("     == OUST University ==         ")
     print("   Course/unit Checking System")
     print("-------------------------------------")
     print("")

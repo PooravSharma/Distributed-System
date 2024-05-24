@@ -50,7 +50,7 @@ class honorsCheck(object):
             try:
                 scores = [float(unit_score) for _, unit_score in globalGrade]
                 course_average = sum(scores) / numberOfGrade if scores else 0
-                print(f"in Server1: SA1 -> Client : Course average is {course_average}")
+              
                 totalAverage = round(course_average, 2)
 
             except ValueError as e:
@@ -66,7 +66,7 @@ class honorsCheck(object):
         globalGrade = sorted(globalGrade, key = lambda x: [1], reverse = True)
         topGrades = globalGrade[:8]
         totalSum = sum(grade for _, grade in topGrades)
-        topAverage = totalSum / 8.0
+        topAverage = totalSum / len(topGrades)
         topAverage = round(topAverage, 2)
 
     def manualHonours(self, manualList: list):
@@ -83,7 +83,7 @@ class honorsCheck(object):
         self.calculateCourseAverage()
         passedGrade = len(globalGrade)
         failNumber= sum(1 for _, grade in globalGrade if grade < 50) 
-
+        print("in Server1: SA1 -> Client : Evaluation Result")
         if passedGrade <= 15:
             return f"{globalID}, {totalAverage}, completed less than 16 units! DOES NOT QUALIFY FOR HONORS STUDY!"
     
